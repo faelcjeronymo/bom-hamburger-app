@@ -1,5 +1,5 @@
-import 'package:bom_burger_app/screens/cart/cart_screen.dart';
-import 'package:bom_burger_app/screens/home/home_screen.dart';
+import 'package:bom_hamburger_app/screens/cart/cart_screen.dart';
+import 'package:bom_hamburger_app/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {

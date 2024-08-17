@@ -1,4 +1,4 @@
-import 'package:bom_burger_app/core/app_colors.dart';
+import 'package:bom_hamburger_app/core/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class CartScreen extends StatefulWidget {
