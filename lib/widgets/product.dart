@@ -7,14 +7,21 @@ enum ProductType {
   softDrink,
 }
 
+enum CardType {
+  addToCart,
+  removeFromCart,
+}
+
 class Product extends StatelessWidget {
-  const Product(this.type, {this.productName = '', super.key});
+  const Product(this.productName, this.type, this.productCardType, {super.key});
 
   final ProductType type;
   final String productName;
+  final CardType productCardType;
 
   @override
   Widget build(BuildContext context) {
+    //Setting card image
     String productImage = '';
 
     switch (type) {
@@ -34,80 +41,51 @@ class Product extends StatelessWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.1),
-              blurRadius: 6,
-              spreadRadius: -1,
-              offset: Offset(
-                0,
-                4,
-              ),
-            ),
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.06),
-              blurRadius: 4,
-              spreadRadius: -1,
-              offset: Offset(
-                0,
-                2,
-              ),
-            ),
-          ]),
-      margin: EdgeInsets.only(bottom: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 64,
-                  height: 84,
-                  margin: EdgeInsets.only(right: 16),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.network(
-                      productImage,
-                      fit: BoxFit.cover,
-                    ),
+      margin: EdgeInsets.only(bottom: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 80,
+                height: 80,
+                margin: EdgeInsets.only(right: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.network(
+                    productImage,
+                    fit: BoxFit.cover,
                   ),
                 ),
-                Container(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(bottom: 2),
-                        child: Text('Lanche',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w500,
-                            )),
-                      ),
-                      Text(
-                        '\$ 5,00',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w800),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              child: Row(
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  AddToCartBtn(),
+                  Container(
+                    margin: EdgeInsets.only(bottom: 2),
+                    child: Text('Lanche',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w500,
+                        )),
+                  ),
+                  Text(
+                    '\$ 5,00',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                  ),
                 ],
               ),
-            )
-          ],
-        ),
+            ],
+          ),
+          Row(
+            children: [
+              (productCardType == CardType.addToCart)
+                  ? AddToCartBtn()
+                  : RemoveFromCartBtn()
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -131,6 +109,7 @@ class AddToCartBtn extends StatelessWidget {
           height: 36,
           child: IconButton(
             padding: EdgeInsets.zero,
+            // TODO - Criar onpressed
             onPressed: () {},
             iconSize: 24,
             icon: const Icon(
@@ -140,6 +119,21 @@ class AddToCartBtn extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class RemoveFromCartBtn extends StatelessWidget {
+  const RemoveFromCartBtn({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      // TODO - Criar onpressed
+      onPressed: () {},
+      icon: Icon(Icons.close),
+      iconSize: 24,
+      color: Colors.black,
     );
   }
 }

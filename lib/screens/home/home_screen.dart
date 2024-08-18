@@ -31,7 +31,9 @@ class HomeScreen extends StatelessWidget {
                               fontSize: 24, fontWeight: FontWeight.w600),
                         ),
                       ),
-                      Product(ProductType.sandwich),
+                      // TODO - Colocar nome dos lanches certos
+                      Product(
+                          'Lanche', ProductType.sandwich, CardType.addToCart),
                     ],
                   ),
                 ),
@@ -46,8 +48,9 @@ class HomeScreen extends StatelessWidget {
                             fontSize: 24, fontWeight: FontWeight.w600),
                       ),
                     ),
-                    Product(ProductType.fries),
-                    Product(ProductType.softDrink),
+                    Product('Fries', ProductType.fries, CardType.addToCart),
+                    Product('Soft Drink', ProductType.softDrink,
+                        CardType.addToCart),
                   ],
                 ),
               ],
