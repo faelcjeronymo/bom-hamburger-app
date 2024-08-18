@@ -7,7 +7,7 @@ class PaymentDetail extends StatelessWidget {
       : super(key: key);
 
   final String paymentDetailLabel;
-  final paymentDetailValue;
+  final double paymentDetailValue;
 
   @override
   Widget build(BuildContext context) {

@@ -1,5 +1,6 @@
 import 'package:bom_hamburger_app/core/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 enum ProductType {
   sandwich,
@@ -12,33 +13,26 @@ enum CardType {
   removeFromCart,
 }
 
-class Product extends StatelessWidget {
-  const Product(this.productName, this.type, this.productCardType, {super.key});
+class ProductCard extends StatelessWidget {
+  const ProductCard(this.productName, this.productType, this.productCardType,
+      this.productImage, this.productValue,
+      {super.key});
 
-  final ProductType type;
+  final ProductType productType;
   final String productName;
   final CardType productCardType;
+  final String productImage;
+  final double productValue;
 
   @override
   Widget build(BuildContext context) {
-    //Setting card image
-    String productImage = '';
+    NumberFormat formatter = NumberFormat.currency(
+      locale: 'en_US',
+      symbol: '',
+      decimalDigits: 2,
+    );
 
-    switch (type) {
-      case ProductType.sandwich:
-        productImage =
-            'https://plus.unsplash.com/premium_photo-1675252371648-7a6481df8226?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-        break;
-      case ProductType.fries:
-        productImage =
-            'https://plus.unsplash.com/premium_photo-1683121324474-83460636b0ed?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-        break;
-      case ProductType.softDrink:
-        productImage =
-            'https://images.unsplash.com/photo-1716800586014-fea19e9453fb?q=80&w=2034&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
-        break;
-      default:
-    }
+    String formatedProductValue = formatter.format(productValue);
 
     return Container(
       margin: EdgeInsets.only(bottom: 16),
@@ -64,14 +58,14 @@ class Product extends StatelessWidget {
                 children: [
                   Container(
                     margin: EdgeInsets.only(bottom: 2),
-                    child: Text('Lanche',
+                    child: Text('$productName',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w500,
                         )),
                   ),
                   Text(
-                    '\$ 5,00',
+                    '\$ $formatedProductValue',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
                   ),
                 ],

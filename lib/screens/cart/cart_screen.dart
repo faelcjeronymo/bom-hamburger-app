@@ -1,7 +1,7 @@
 import 'package:bom_hamburger_app/core/app_colors.dart';
-import 'package:bom_hamburger_app/widgets/cart_product.dart';
+import 'package:bom_hamburger_app/widgets/cart_product_card.dart';
 import 'package:bom_hamburger_app/widgets/payment_details.dart';
-import 'package:bom_hamburger_app/widgets/product.dart';
+import 'package:bom_hamburger_app/widgets/product_card.dart';
 import 'package:flutter/material.dart';
 
 class CartScreen extends StatefulWidget {
@@ -37,13 +37,13 @@ class _CartScreenState extends State<CartScreen> {
                   margin: EdgeInsets.only(bottom: 22),
                   child: Column(
                     children: [
-                      Product('Lanche', ProductType.sandwich,
-                          CardType.removeFromCart),
+                      // ProductCard('Lanche', ProductType.sandwich,
+                      //     CardType.removeFromCart),
                       Divider(
                         thickness: 1,
                       ),
-                      Product('Lanche', ProductType.sandwich,
-                          CardType.removeFromCart),
+                      // ProductCard('Lanche', ProductType.sandwich,
+                      //     CardType.removeFromCart),
                       Divider(
                         thickness: 1,
                       ),

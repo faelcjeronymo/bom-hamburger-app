@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Bom Burger',
+      title: 'Bom Hamburger',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
