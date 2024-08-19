@@ -2,27 +2,21 @@ import 'package:bom_hamburger_app/core/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-enum ProductType {
-  sandwich,
-  fries,
-  softDrink,
-}
-
-enum CardType {
+enum ProductCardType {
   addToCart,
   removeFromCart,
 }
 
 class ProductCard extends StatelessWidget {
-  const ProductCard(this.productName, this.productType, this.productCardType,
-      this.productImage, this.productValue,
+  const ProductCard(this.productName, this.productCardType, this.productImage,
+      this.productValue, this.cardBtnOnPressed,
       {super.key});
 
-  final ProductType productType;
   final String productName;
-  final CardType productCardType;
+  final ProductCardType productCardType;
   final String productImage;
   final double productValue;
+  final VoidCallback cardBtnOnPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -74,9 +68,9 @@ class ProductCard extends StatelessWidget {
           ),
           Row(
             children: [
-              (productCardType == CardType.addToCart)
-                  ? AddToCartBtn()
-                  : RemoveFromCartBtn()
+              (productCardType == ProductCardType.addToCart)
+                  ? AddToCartBtn(cardBtnOnPressed)
+                  : RemoveFromCartBtn(cardBtnOnPressed)
             ],
           ),
         ],
@@ -86,7 +80,9 @@ class ProductCard extends StatelessWidget {
 }
 
 class AddToCartBtn extends StatelessWidget {
-  const AddToCartBtn({Key? key}) : super(key: key);
+  const AddToCartBtn(this.onPressed, {Key? key}) : super(key: key);
+
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -103,8 +99,7 @@ class AddToCartBtn extends StatelessWidget {
           height: 36,
           child: IconButton(
             padding: EdgeInsets.zero,
-            // TODO - Criar onpressed
-            onPressed: () {},
+            onPressed: onPressed,
             iconSize: 24,
             icon: const Icon(
               Icons.add,
@@ -118,13 +113,14 @@ class AddToCartBtn extends StatelessWidget {
 }
 
 class RemoveFromCartBtn extends StatelessWidget {
-  const RemoveFromCartBtn({Key? key}) : super(key: key);
+  const RemoveFromCartBtn(this.onPressed, {Key? key}) : super(key: key);
+
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      // TODO - Criar onpressed
-      onPressed: () {},
+      onPressed: onPressed,
       icon: Icon(Icons.close),
       iconSize: 24,
       color: Colors.black,

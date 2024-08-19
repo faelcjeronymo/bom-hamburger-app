@@ -18,10 +18,6 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomeScreen(),
-      routes: {
-        '/home': (context) => const HomeScreen(),
-        '/cart': (context) => const CartScreen(),
-      },
     );
   }
 }

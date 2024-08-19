@@ -1,11 +1,17 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:bom_hamburger_app/core/app_colors.dart';
-import 'package:bom_hamburger_app/widgets/cart_product_card.dart';
 import 'package:bom_hamburger_app/widgets/payment_details.dart';
-import 'package:bom_hamburger_app/widgets/product_card.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+final _formKey = GlobalKey<FormState>();
 
 class CartScreen extends StatefulWidget {
-  const CartScreen({Key? key}) : super(key: key);
+  const CartScreen(this.selectedProducts, {Key? key}) : super(key: key);
+
+  final List<int> selectedProducts;
 
   @override
   State<CartScreen> createState() => _CartScreenState();
@@ -37,6 +43,7 @@ class _CartScreenState extends State<CartScreen> {
                   margin: EdgeInsets.only(bottom: 22),
                   child: Column(
                     children: [
+                      //TODO - Exibir os produtos selecionados
                       // ProductCard('Lanche', ProductType.sandwich,
                       //     CardType.removeFromCart),
                       Divider(
@@ -55,12 +62,12 @@ class _CartScreenState extends State<CartScreen> {
                   child: Column(
                     children: [
                       Container(
-                        child: PaymentDetail('Sub Total', 1.50),
+                        child: PaymentDetails('Sub Total', 1.50),
                         margin: EdgeInsets.only(bottom: 18),
                       ),
                       // TODO -  Exibiçao condicional de desconto
                       Container(
-                        child: PaymentDetail('Discount', 0.00),
+                        child: PaymentDetails('Discount', 0.00),
                         margin: EdgeInsets.only(bottom: 18),
                       ),
                       Container(
@@ -71,7 +78,7 @@ class _CartScreenState extends State<CartScreen> {
                         ),
                       ),
                       Container(
-                        child: PaymentDetail('Total', 0.00),
+                        child: PaymentDetails('Total', 0.00),
                         margin: EdgeInsets.only(bottom: 18),
                       ),
                     ],
@@ -83,10 +90,10 @@ class _CartScreenState extends State<CartScreen> {
                     height: 54,
                     child: ElevatedButton(
                       onPressed: () {
-                        showPaymentModal(context);
+                        showPaymentModal(context, widget.selectedProducts);
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: AppColor.primaryColor,
+                        backgroundColor: AppColor.primaryColor,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
@@ -103,32 +110,41 @@ class _CartScreenState extends State<CartScreen> {
   }
 }
 
-void showPaymentModal(BuildContext context) {
+void showPaymentModal(BuildContext context, List<int> selectedProducts) {
   showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (BuildContext context) {
+        final TextEditingController _textFieldController =
+            TextEditingController();
+
         return Padding(
           padding:
               EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
           child: Container(
-            height: 280,
+            height: 320,
             child: Padding(
               padding: const EdgeInsets.all(24),
               child: Column(
-                //TODO - Trocar cor da caixa de texto
                 children: [
                   Container(
-                    margin: EdgeInsets.only(bottom: 48),
+                    margin: const EdgeInsets.only(bottom: 48),
                     child: Center(
-                      child: TextField(
-                        decoration: InputDecoration(
-                            labelText: 'Your Name',
-                            labelStyle: TextStyle(fontSize: 18)),
+                      child: Form(
+                        key: _formKey,
+                        child: TextFormField(
+                            controller: _textFieldController,
+                            decoration: const InputDecoration(
+                                labelText: 'Your Name',
+                                labelStyle: TextStyle(fontSize: 18)),
+                            cursorColor: AppColor.primaryColor,
+                            validator: (customerName) => customerName!.isEmpty
+                                ? 'Please, enter your name.'
+                                : null),
                       ),
                     ),
                   ),
-                  PaymentDetail('Total', 0.00),
+                  PaymentDetails('Total', 0.00),
                   Divider(
                     thickness: 1,
                     height: 42,
@@ -143,7 +159,9 @@ void showPaymentModal(BuildContext context) {
                             child: SizedBox(
                               height: 54,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
                                 child: Text(
                                   'Edit Order',
                                   style: TextStyle(
@@ -151,7 +169,7 @@ void showPaymentModal(BuildContext context) {
                                       decoration: TextDecoration.underline),
                                 ),
                                 style: ElevatedButton.styleFrom(
-                                    primary: Colors.transparent,
+                                    backgroundColor: Colors.transparent,
                                     shadowColor: Colors.transparent),
                               ),
                             ),
@@ -163,10 +181,19 @@ void showPaymentModal(BuildContext context) {
                             child: SizedBox(
                               height: 54,
                               child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    final String payerName =
+                                        _textFieldController.text;
+
+                                    //TODO - Colocar o valor total da soma dos produtos do carrinho
+                                    createOrder(
+                                        0.00, selectedProducts, payerName);
+                                  }
+                                },
                                 child: Text('Pay Now'),
                                 style: ElevatedButton.styleFrom(
-                                    primary: AppColor.primaryColor,
+                                    backgroundColor: AppColor.primaryColor,
                                     shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(14))),
@@ -184,3 +211,32 @@ void showPaymentModal(BuildContext context) {
         );
       });
 }
+
+void createOrder(double total, List<int> productsId, String payerName) async {
+  final String orderId = Random().nextInt(99999).toString();
+
+  Map<String, dynamic> data = {
+    'order': {
+      'id': orderId,
+      'total': total,
+      'products_id': productsId,
+      'payerName': payerName
+    }
+  };
+
+  final prefs = await SharedPreferences.getInstance();
+
+  await prefs.setString(orderId, jsonEncode(data));
+}
+
+//TODO - criar uma função que faz todas as somas necessárias
+/** 
+ * Como posso fazer?
+ * 
+ * Recupero os id's dos produtos e carrego o JSON e pra cada produto eu vejo o valor
+ * e faço as somas.
+ * 
+ * no retorno eu retornaria o total e valor com desconto.
+ * 
+ * A logica do desconto eu poderia fazer com varias variaveis auxiliares booleanas e varios ifs
+ */

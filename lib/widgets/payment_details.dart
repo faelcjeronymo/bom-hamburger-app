@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class PaymentDetail extends StatelessWidget {
-  const PaymentDetail(this.paymentDetailLabel, this.paymentDetailValue,
+class PaymentDetails extends StatelessWidget {
+  const PaymentDetails(this.paymentDetailLabel, this.paymentDetailValue,
       {Key? key})
       : super(key: key);
 
