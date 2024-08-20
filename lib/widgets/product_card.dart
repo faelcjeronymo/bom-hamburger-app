@@ -121,7 +121,7 @@ class RemoveFromCartBtn extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
       onPressed: onPressed,
-      icon: Icon(Icons.close),
+      icon: const Icon(Icons.close),
       iconSize: 24,
       color: Colors.black,
     );

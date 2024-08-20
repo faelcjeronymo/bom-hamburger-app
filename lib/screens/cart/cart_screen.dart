@@ -2,27 +2,71 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:bom_hamburger_app/core/app_colors.dart';
+import 'package:bom_hamburger_app/screens/home/home_screen.dart';
 import 'package:bom_hamburger_app/widgets/payment_details.dart';
+import 'package:bom_hamburger_app/widgets/product_card.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _formKey = GlobalKey<FormState>();
 
 class CartScreen extends StatefulWidget {
-  const CartScreen(this.selectedProducts, {Key? key}) : super(key: key);
+  CartScreen(this.selectedProducts, {Key? key}) : super(key: key);
 
-  final List<int> selectedProducts;
+  final List<Map<String, dynamic>> selectedProducts;
 
   @override
   State<CartScreen> createState() => _CartScreenState();
 }
 
 class _CartScreenState extends State<CartScreen> {
+  double subTotal = 0.00;
+  double discount = 0.00;
+  double total = 0.00;
+
+  void calcValues() {
+    subTotal = 0.00;
+    discount = 0.00;
+
+    //Discount check auxiliar variables
+    bool hasSandwich = widget.selectedProducts
+        .any((element) => element['product_type'] == 'sandwich');
+    bool hasFries = widget.selectedProducts
+        .any((element) => element['product_type'] == 'fries');
+    bool hasSoftDrink = widget.selectedProducts
+        .any((element) => element['product_type'] == 'soft_drink');
+
+    //Calculating values
+
+    //Subtotal
+    for (var selectedProduct in widget.selectedProducts) {
+      subTotal += selectedProduct['product_value'];
+    }
+
+    //Checking discount
+    if (hasSandwich && hasFries && hasSoftDrink) {
+      discount = 0.20;
+    } else if (hasSandwich && hasSoftDrink) {
+      discount = 0.15;
+    } else if (hasSandwich && hasFries) {
+      discount = 0.10;
+    }
+
+    if (discount > 0) {
+      total = (subTotal - (subTotal * discount));
+    } else {
+      total = subTotal;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    calcValues();
+
     return Scaffold(
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.black),
+        iconTheme: const IconThemeData(color: Colors.black),
         title: const Text(
           'Cart',
           style: TextStyle(
@@ -43,43 +87,59 @@ class _CartScreenState extends State<CartScreen> {
                   margin: EdgeInsets.only(bottom: 22),
                   child: Column(
                     children: [
-                      //TODO - Exibir os produtos selecionados
-                      // ProductCard('Lanche', ProductType.sandwich,
-                      //     CardType.removeFromCart),
-                      Divider(
-                        thickness: 1,
-                      ),
-                      // ProductCard('Lanche', ProductType.sandwich,
-                      //     CardType.removeFromCart),
-                      Divider(
-                        thickness: 1,
+                      SizedBox(
+                        height: 330,
+                        child: ListView.builder(
+                          itemCount: widget.selectedProducts.length,
+                          itemBuilder: (context, index) {
+                            return Column(
+                              children: [
+                                ProductCard(
+                                    widget.selectedProducts[index]
+                                        ['product_name'],
+                                    ProductCardType.removeFromCart,
+                                    widget.selectedProducts[index]
+                                        ['product_image'],
+                                    widget.selectedProducts[index]
+                                        ['product_value'], () {
+                                  setState(() {
+                                    widget.selectedProducts.removeAt(index);
+                                  });
+                                }),
+                                const Divider(
+                                  thickness: 1,
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(bottom: 48),
+                  margin: const EdgeInsets.only(bottom: 48),
                   child: Column(
                     children: [
                       Container(
-                        child: PaymentDetails('Sub Total', 1.50),
-                        margin: EdgeInsets.only(bottom: 18),
-                      ),
-                      // TODO -  Exibiçao condicional de desconto
-                      Container(
-                        child: PaymentDetails('Discount', 0.00),
-                        margin: EdgeInsets.only(bottom: 18),
+                        margin: const EdgeInsets.only(bottom: 18),
+                        child: PaymentDetails('Sub Total', subTotal),
                       ),
                       Container(
-                        margin: EdgeInsets.only(bottom: 18),
-                        child: Divider(
+                        margin: const EdgeInsets.only(bottom: 18),
+                        child:
+                            PaymentDetails('Discount', (subTotal * discount)),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 18),
+                        child: const Divider(
                           thickness: 1,
                           height: 24,
                         ),
                       ),
                       Container(
-                        child: PaymentDetails('Total', 0.00),
-                        margin: EdgeInsets.only(bottom: 18),
+                        margin: const EdgeInsets.only(bottom: 18),
+                        child: PaymentDetails('Total', total),
                       ),
                     ],
                   ),
@@ -90,14 +150,18 @@ class _CartScreenState extends State<CartScreen> {
                     height: 54,
                     child: ElevatedButton(
                       onPressed: () {
-                        showPaymentModal(context, widget.selectedProducts);
+                        showPaymentModal(
+                            context, total, widget.selectedProducts);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.primaryColor,
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: Text('Order now'),
+                      child: const Text(
+                        'Order now',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 )
@@ -110,7 +174,8 @@ class _CartScreenState extends State<CartScreen> {
   }
 }
 
-void showPaymentModal(BuildContext context, List<int> selectedProducts) {
+void showPaymentModal(
+    BuildContext context, double orderTotal, List<Map> selectedProducts) {
   showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -144,7 +209,7 @@ void showPaymentModal(BuildContext context, List<int> selectedProducts) {
                       ),
                     ),
                   ),
-                  PaymentDetails('Total', 0.00),
+                  PaymentDetails('Total', orderTotal),
                   Divider(
                     thickness: 1,
                     height: 42,
@@ -186,17 +251,38 @@ void showPaymentModal(BuildContext context, List<int> selectedProducts) {
                                     final String payerName =
                                         _textFieldController.text;
 
-                                    //TODO - Colocar o valor total da soma dos produtos do carrinho
-                                    createOrder(
-                                        0.00, selectedProducts, payerName);
+                                    createOrder(orderTotal, selectedProducts,
+                                        payerName);
+
+                                    showDialog<String>(
+                                        context: context,
+                                        builder: (BuildContext context) =>
+                                            AlertDialog(
+                                              title: const Text(''),
+                                              content:
+                                                  const Text('Order Created!'),
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () => Navigator.of(context).popUntil((predicate) => predicate.isFirst),
+                                                    child: const Text(
+                                                      'OK',
+                                                      style: TextStyle(
+                                                          color: AppColor
+                                                              .primaryColor),
+                                                    ))
+                                              ],
+                                            ));
                                   }
                                 },
-                                child: Text('Pay Now'),
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColor.primaryColor,
                                     shape: RoundedRectangleBorder(
                                         borderRadius:
                                             BorderRadius.circular(14))),
+                                child: const Text(
+                                  'Pay Now',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
                             ),
                           ),
@@ -212,14 +298,16 @@ void showPaymentModal(BuildContext context, List<int> selectedProducts) {
       });
 }
 
-void createOrder(double total, List<int> productsId, String payerName) async {
+void createOrder(double total, List<Map> products, String payerName) async {
+  //Create the order and save at the local storage
+
   final String orderId = Random().nextInt(99999).toString();
 
   Map<String, dynamic> data = {
     'order': {
       'id': orderId,
       'total': total,
-      'products_id': productsId,
+      'products': products,
       'payerName': payerName
     }
   };
@@ -228,15 +316,3 @@ void createOrder(double total, List<int> productsId, String payerName) async {
 
   await prefs.setString(orderId, jsonEncode(data));
 }
-
-//TODO - criar uma função que faz todas as somas necessárias
-/** 
- * Como posso fazer?
- * 
- * Recupero os id's dos produtos e carrego o JSON e pra cada produto eu vejo o valor
- * e faço as somas.
- * 
- * no retorno eu retornaria o total e valor com desconto.
- * 
- * A logica do desconto eu poderia fazer com varias variaveis auxiliares booleanas e varios ifs
- */

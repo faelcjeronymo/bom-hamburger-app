@@ -1,10 +1,8 @@
-import 'dart:convert';
-
 import 'package:bom_hamburger_app/core/app_colors.dart';
+import 'package:bom_hamburger_app/data/products.dart';
 import 'package:bom_hamburger_app/screens/cart/cart_screen.dart';
 import 'package:bom_hamburger_app/widgets/product_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,67 +12,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  Map<String, dynamic> productObject = {};
-  bool isLoading = true;
-
-  List<int> selectedProducts = [];
-
-  @override
-  void initState() {
-    super.initState();
-    loadProducts();
-  }
-
-  void loadProducts() async {
-    try {
-      final String productsJsonString =
-          await rootBundle.loadString('assets/data/products.json');
-      final Map<String, dynamic> productsJsonData =
-          json.decode(productsJsonString);
-
-      setState(() {
-        productObject = productsJsonData;
-        isLoading = false; // Define que o carregamento foi concluído
-      });
-    } catch (e) {
-      // Tratamento de erro, se necessário
-      print("Erro ao carregar os produtos: $e");
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  void addProductToCart(int productId) {
-    if (selectedProducts.contains(productId)) {
-      showDialog<String>(
-          context: context,
-          builder: (BuildContext context) => AlertDialog(
-                title: const Text('Error'),
-                content: const Text('Product already added to cart.'),
-                actions: [
-                  TextButton(
-                      onPressed: () => Navigator.pop(context, 'OK'),
-                      child: const Text(
-                        'OK',
-                        style: TextStyle(color: AppColor.primaryColor),
-                      ))
-                ],
-              ));
-
-      return;
-    }
-
-    selectedProducts.add(productId);
-    final snackBar = SnackBar(content: Text('Added to cart!'));
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
+  List<Map<String, dynamic>> selectedProducts = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Bom Hamburger'),
+        title: const Text(
+          'Bom Hamburger',
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: AppColor.primaryColor,
       ),
       body: Padding(
@@ -94,14 +41,21 @@ class _HomeScreenState extends State<HomeScreen> {
                           TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
                     ),
                   ),
-                  ProductCard(
-                      'X Bacon',
-                      ProductCardType.addToCart,
-                      'https://plus.unsplash.com/premium_photo-1675252371648-7a6481df8226?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-                      5.00, () {
-                    addProductToCart(1);
-                  }),
-                  // TODO - Products List (CASO NAO DE CERTO RENDERIZE OS WIDGETS NA MAO SÓ PRA FUNCIONAR)
+                  SizedBox(
+                    height: 300,
+                    child: ListView.builder(
+                      itemCount: sandwiches.length,
+                      itemBuilder: (context, index) {
+                        return ProductCard(
+                            sandwiches[index]['product_name'],
+                            ProductCardType.addToCart,
+                            sandwiches[index]['product_image'],
+                            sandwiches[index]['product_value'], () {
+                          addProductToCart(sandwiches[index]);
+                        });
+                      },
+                    ),
+                  )
                 ],
               ),
             ),
@@ -115,7 +69,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
                   ),
                 ),
-                  // TODO - Products List (CASO NAO DE CERTO RENDERIZE OS WIDGETS NA MAO SÓ PRA FUNCIONAR)
+                SizedBox(
+                  height: 300,
+                  child: ListView.builder(
+                    itemCount: extras.length,
+                    itemBuilder: (context, index) {
+                      return ProductCard(
+                          extras[index]['product_name'],
+                          ProductCardType.addToCart,
+                          extras[index]['product_image'],
+                          extras[index]['product_value'], () {
+                        addProductToCart(extras[index]);
+                      });
+                    },
+                  ),
+                )
               ],
             ),
           ],
@@ -131,8 +99,47 @@ class _HomeScreenState extends State<HomeScreen> {
               ));
         },
         backgroundColor: AppColor.primaryColor,
-        child: const Icon(Icons.shopping_cart),
+        child: const Icon(Icons.shopping_cart, color: Colors.white),
       ),
     );
+  }
+
+  void addProductToCart(Map<String, dynamic> productMap) {
+    String productTypeToSearch =
+        (productMap.isNotEmpty) ? productMap['product_type'] : '';
+
+    Map<String, dynamic>? findProduct = {};
+
+    if (selectedProducts.isNotEmpty) {
+      findProduct = selectedProducts.firstWhere(
+        (selectedProduct) =>
+            selectedProduct['product_type'] == productTypeToSearch,
+        orElse: () => {},
+      );
+    }
+
+    if (findProduct.isNotEmpty) {
+      showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+                title: const Text('Error'),
+                content: const Text('Product already added to cart.'),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.pop(context, 'OK'),
+                      child: const Text(
+                        'OK',
+                        style: TextStyle(color: AppColor.primaryColor),
+                      ))
+                ],
+              ));
+
+      return;
+    }
+
+    selectedProducts.add(productMap);
+
+    final snackBar = SnackBar(content: Text('Added to cart!'));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }
